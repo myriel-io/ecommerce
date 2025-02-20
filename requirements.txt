@@ -1,0 +1,5 @@
+streamlit==1.32.0
+qdrant-client==1.7.0
+sentence-transformers==2.2.2
+huggingface-hub==0.14.1
+torch>=2.0.0
