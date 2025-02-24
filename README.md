@@ -1,21 +1,22 @@
 # H&M Fashion Search
 
-A semantic search application for H&M fashion items using Streamlit, Qdrant vector database, and CLIP embeddings.
+A semantic search application for H&M fashion items using FastAPI, Qdrant vector database, and CLIP embeddings.
 
 ## Description
 
-This application provides a user-friendly interface to search through H&M fashion items using natural language queries. It leverages semantic search capabilities through CLIP embeddings and Qdrant vector database to find visually similar fashion items.
+This application provides a REST API and web interface to search through H&M fashion items using natural language queries. It leverages semantic search capabilities through CLIP embeddings and Qdrant vector database to find visually similar fashion items.
 
 ## Features
 
-- Semantic search using natural language queries
+- RESTful API for semantic search
+- Web interface with responsive design
 - Visual results display with product images and names
-- Responsive grid layout showing up to 6 results
 - Real-time search functionality
+- CORS enabled for API access
 
 ## Prerequisites
 
-- Python 3.7+
+- Python 3.11+
 - Qdrant running locally or remotely
 - Required Python packages (see requirements.txt)
 
@@ -28,41 +29,56 @@ git clone <repository-url>
 cd h-and-m-fashion-search
 ```
 
-2. Install the required dependencies:
+2. Create and activate a virtual environment:
+
+```bash
+python3.11 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+3. Install the required dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Ensure Qdrant is running on localhost:6333 (or update the configuration in app.py accordingly)
+4. Ensure Qdrant is running on localhost:6333 (or update the configuration in app.py accordingly)
 
 ## Configuration
 
 The application uses the following default configuration (can be modified in app.py):
 - Qdrant Host: localhost
 - Qdrant Port: 6333
-- Collection Name: hnm
+- Collection Name: h&m-mini
 - Embedding Model: clip-ViT-B-32
 
 ## Usage
 
-1. Start the Streamlit application:
+1. Start the FastAPI application:
 
 ```bash
-streamlit run app.py
+uvicorn app:app --reload
 ```
 
-2. Open your web browser and navigate to the provided local URL (typically http://localhost:8501)
+2. Access the application:
+- Web Interface: http://localhost:8000/static/index.html
+- API Documentation: http://localhost:8000/docs
+- API Base URL: http://localhost:8000
 
-3. Enter your search query in the text input field and click "Search"
+## API Endpoints
+
+- `GET /`: Health check endpoint
+- `GET /search/{query}`: Search endpoint that accepts a query string and returns matching fashion items
+- Static files served from `/static` directory
 
 ## Technical Details
 
 The application uses:
-- Streamlit for the web interface
+- FastAPI for the REST API
 - Qdrant for vector similarity search
 - CLIP (ViT-B-32) for generating embeddings
 - SentenceTransformer for text encoding
+- HTML/JavaScript for the frontend interface
 
 ## Contributing
 
