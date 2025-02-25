@@ -19,6 +19,16 @@ class SearchResult(BaseModel):
     image_url: str
     prod_name: str
     detail_desc: str
+    product_type_name: str
+    index_group_name: str
+    price: float = 0.0
+    article_id: str = ""
+    available: bool = True
+    color: str = ""
+    size: str = ""
+
+    class Config:
+        from_attributes = True
 
 class QdrantService:
     def __init__(self):
@@ -68,7 +78,14 @@ class QdrantService:
                 SearchResult(
                     image_url=hit.payload.get('image_url', ''),
                     prod_name=hit.payload.get('prod_name', 'Unknown Product'),
-                    detail_desc=hit.payload.get('detail_desc', 'No description available')
+                    detail_desc=hit.payload.get('detail_desc', 'No description available'),
+                    product_type_name=hit.payload.get('product_type_name', ''),
+                    index_group_name=hit.payload.get('index_group_name', ''),
+                    price=float(hit.payload.get('price', 0.0)),
+                    article_id=hit.payload.get('article_id', ''),
+                    available=hit.payload.get('available', True),
+                    color=hit.payload.get('colour_group_name', ''),
+                    size=hit.payload.get('size', '')
                 ) 
                 for hit in results
             ]

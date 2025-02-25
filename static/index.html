@@ -356,6 +356,140 @@
         .sidebar::-webkit-scrollbar-thumb:hover {
             background-color: rgba(0,0,0,0.2);
         }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            width: 90%;
+            max-width: 1000px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #666;
+            cursor: pointer;
+            z-index: 1002;
+        }
+
+        .modal-body {
+            display: flex;
+            gap: 40px;
+            padding: 30px;
+        }
+
+        #modalImage {
+            width: 400px;
+            height: 533px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .modal-details {
+            flex: 1;
+            padding: 20px 0;
+        }
+
+        .modal-details h2 {
+            margin: 0 0 20px 0;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .modal-details p {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .modal-body {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            #modalImage {
+                width: 100%;
+                height: auto;
+            }
+        }
+
+        .product-meta {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .price {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .availability {
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .availability.in-stock {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .availability.out-of-stock {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+
+        .product-info {
+            background-color: var(--secondary-color);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .info-row {
+            display: flex;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-row .label {
+            width: 100px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .description h3 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
     </style>
 </head>
 <body>
@@ -429,6 +563,48 @@
         <div id="results" class="results-grid"></div>
         <div class="load-more">
             <button id="loadMoreBtn" onclick="loadMore()">Load More</button>
+        </div>
+    </div>
+
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="modal-body">
+                <img id="modalImage" src="" alt="">
+                <div class="modal-details">
+                    <h2 id="modalTitle"></h2>
+                    <div class="product-meta">
+                        <span class="price">$<span id="modalPrice">0.00</span></span>
+                        <span class="availability" id="modalAvailability"></span>
+                    </div>
+                    <div class="product-info">
+                        <div class="info-row">
+                            <span class="label">Category:</span>
+                            <span id="modalCategory"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Type:</span>
+                            <span id="modalType"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Color:</span>
+                            <span id="modalColor"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Size:</span>
+                            <span id="modalSize"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Article ID:</span>
+                            <span id="modalArticleId"></span>
+                        </div>
+                    </div>
+                    <div class="description">
+                        <h3>Description</h3>
+                        <p id="modalDescription"></p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -573,6 +749,7 @@
                             <h3>${result.prod_name}</h3>
                             <div class="product-desc">${result.detail_desc.length > 100 ? result.detail_desc.substring(0, 100) + '...' : result.detail_desc}</div>
                         `;
+                        productCard.onclick = () => showProductDetails(result);
                         resultsDiv.appendChild(productCard);
                     });
 
@@ -608,6 +785,50 @@
             await loadGroups();  // First load the groups
             searchFashion();     // Then load all results
         });
+
+        function showProductDetails(result) {
+            const modal = document.getElementById('productModal');
+            const modalImg = document.getElementById('modalImage');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalDesc = document.getElementById('modalDescription');
+            const modalPrice = document.getElementById('modalPrice');
+            const modalAvailability = document.getElementById('modalAvailability');
+            const modalCategory = document.getElementById('modalCategory');
+            const modalType = document.getElementById('modalType');
+            const modalColor = document.getElementById('modalColor');
+            const modalSize = document.getElementById('modalSize');
+            const modalArticleId = document.getElementById('modalArticleId');
+
+            modalImg.src = result.image_url;
+            modalImg.onerror = () => {
+                modalImg.src = 'https://via.placeholder.com/400x533?text=Image+Not+Available';
+            };
+            modalTitle.textContent = result.prod_name;
+            modalDesc.textContent = result.detail_desc;
+            modalPrice.textContent = result.price.toFixed(2);
+            
+            modalAvailability.textContent = result.available ? 'In Stock' : 'Out of Stock';
+            modalAvailability.className = 'availability ' + (result.available ? 'in-stock' : 'out-of-stock');
+            
+            modalCategory.textContent = result.index_group_name;
+            modalType.textContent = result.product_type_name;
+            modalColor.textContent = result.color || 'N/A';
+            modalSize.textContent = result.size || 'N/A';
+            modalArticleId.textContent = result.article_id;
+
+            modal.style.display = 'block';
+        }
+
+        document.querySelector('.close').onclick = function() {
+            document.getElementById('productModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('productModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
     </script>
 </body>
 </html> 
