@@ -43,28 +43,36 @@ async def read_root():
 async def search_fashion_items(
     query: str = "", 
     group: List[str] = Query(default=[]),
+    item: List[str] = Query(default=[]),
     limit: int = 20,
     offset: int = 0
 ):
-    """Search for fashion items using semantic search and/or group filter."""
+    """Search for fashion items using semantic search and/or filters."""
     try:
         # Decode URL-encoded parameters and clean them
         query = unquote(query.strip())
         groups = [unquote(g.strip()) for g in group]
+        items = [unquote(i.strip()) for i in item]
 
-        print(f"Search request - Query: '{query}', Groups: {groups}, Offset: {offset}")  # Debug log
+        print(f"Search request - Query: '{query}', Groups: {groups}, Items: {items}, Offset: {offset}")
 
-        # Create group filter condition
-        conditions = None
+        # Create filter conditions
+        must_conditions = []
+        
         if groups:
-            conditions = {
-                "must": [
-                    {
-                        "key": "index_group_name",
-                        "match": {"any": groups}  # Match any of the selected groups
-                    }
-                ]
-            }
+            must_conditions.append({
+                "key": "index_group_name",
+                "match": {"any": groups}
+            })
+            
+        if items:
+            # Add a condition that matches items in product_type_name
+            must_conditions.append({
+                "key": "product_type_name",
+                "match": {"any": items}
+            })
+
+        conditions = {"must": must_conditions} if must_conditions else None
 
         # If no query, use scroll to get all items (filtered by group if specified)
         if not query:

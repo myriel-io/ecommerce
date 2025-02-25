@@ -135,6 +135,12 @@
         .clear-filters:hover {
             background-color: #5a6268;
         }
+
+        .facet-group + .facet-group {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+        }
     </style>
 </head>
 <body>
@@ -144,6 +150,35 @@
             <div class="facet-title">Product Group</div>
             <div class="facet-options" id="groupFacets">
                 <!-- Groups will be populated here -->
+            </div>
+        </div>
+        <div class="facet-group">
+            <div class="facet-title">Item</div>
+            <div class="facet-options" id="itemFacets">
+                <div class="facet-option">
+                    <input type="checkbox" id="Dress" value="Dress" onchange="handleItemChange(this)">
+                    <label for="Dress">Dress</label>
+                </div>
+                <div class="facet-option">
+                    <input type="checkbox" id="Jacket" value="Jacket" onchange="handleItemChange(this)">
+                    <label for="Jacket">Jacket</label>
+                </div>
+                <div class="facet-option">
+                    <input type="checkbox" id="Sneakers" value="Sneakers" onchange="handleItemChange(this)">
+                    <label for="Sneakers">Sneakers</label>
+                </div>
+                <div class="facet-option">
+                    <input type="checkbox" id="Gloves" value="Gloves" onchange="handleItemChange(this)">
+                    <label for="Gloves">Gloves</label>
+                </div>
+                <div class="facet-option">
+                    <input type="checkbox" id="Shirt" value="Shirt" onchange="handleItemChange(this)">
+                    <label for="Shirt">Shirt</label>
+                </div>
+                <div class="facet-option">
+                    <input type="checkbox" id="Sweater" value="Sweater" onchange="handleItemChange(this)">
+                    <label for="Sweater">Sweater</label>
+                </div>
             </div>
         </div>
         <button class="clear-filters" onclick="clearFilters()">Clear All Filters</button>
@@ -169,6 +204,7 @@
         let currentOffset = 0;
         let currentQuery = '';
         let selectedGroups = new Set();
+        let selectedItems = new Set();
         let hasMore = true;
 
         async function loadGroups() {
@@ -201,8 +237,18 @@
             searchFashion();
         }
 
+        function handleItemChange(checkbox) {
+            if (checkbox.checked) {
+                selectedItems.add(checkbox.value);
+            } else {
+                selectedItems.delete(checkbox.value);
+            }
+            searchFashion();
+        }
+
         function clearFilters() {
             selectedGroups.clear();
+            selectedItems.clear();
             document.querySelectorAll('.facet-option input[type="checkbox"]').forEach(cb => {
                 cb.checked = false;
             });
@@ -250,6 +296,11 @@
                 if (selectedGroups.size > 0) {
                     selectedGroups.forEach(group => {
                         searchParams.append('group', group);
+                    });
+                }
+                if (selectedItems.size > 0) {
+                    selectedItems.forEach(item => {
+                        searchParams.append('item', item);
                     });
                 }
                 searchParams.append('limit', '20');
