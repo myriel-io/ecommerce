@@ -1,96 +1,48 @@
 # H&M Fashion Search
 
-A semantic search application for H&M fashion items using FastAPI, Qdrant vector database, and CLIP embeddings.
-
-## Description
-
-This application provides a REST API and web interface to search through H&M fashion items using natural language queries. It leverages semantic search capabilities through CLIP embeddings and Qdrant vector database to find visually similar fashion items.
+A semantic fashion search engine using FastAPI, Qdrant, and CLIP embeddings.
 
 ## Features
 
-- RESTful API for semantic search
-- Web interface with responsive design
-- Visual results display with product images and names
-- Real-time search functionality
-- CORS enabled for API access
+- 🔍 Semantic search with CLIP embeddings
+- 🎯 Category and item type filtering
+- 📱 Responsive web interface
+- ⚡ Real-time search results
+- 🔄 Infinite scroll pagination
 
-## Prerequisites
+## Quick Start
 
-- Python 3.11+
-- Qdrant running locally or remotely
-- Required Python packages (see requirements.txt)
-
-## Installation
-
-1. Clone the repository:
-
+1. Clone and install:
 ```bash
-git clone <repository-url>
+git clone <repo-url>
 cd h-and-m-fashion-search
-```
-
-2. Create and activate a virtual environment:
-
-```bash
-python3.11 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-3. Install the required dependencies:
-
-```bash
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-4. Ensure Qdrant is running on localhost:6333 (or update the configuration in app.py accordingly)
+2. Start Qdrant (ensure it's running on localhost:6333)
 
-## Configuration
-
-The application uses the following default configuration (can be modified in app.py):
-- Qdrant Host: localhost
-- Qdrant Port: 6333
-- Collection Name: h&m-mini
-- Embedding Model: clip-ViT-B-32
-
-## Usage
-
-1. Start the FastAPI application:
-
+3. Run the app:
 ```bash
 uvicorn app:app --reload
 ```
 
-2. Access the application:
-- Web Interface: http://localhost:8000/static/index.html
-- API Documentation: http://localhost:8000/docs
-- API Base URL: http://localhost:8000
+4. Visit http://localhost:8000/static/index.html
 
-## API Endpoints
+## API
 
-- `GET /`: Health check endpoint
-- `GET /search/{query}`: Search endpoint that accepts a query string and returns matching fashion items
-- Static files served from `/static` directory
+- GET /search - Search with filters
+- GET /groups - Get product groups
+- API docs: http://localhost:8000/docs
 
-## Technical Details
+## Tech Stack
 
-The application uses:
-- FastAPI for the REST API
-- Qdrant for vector similarity search
-- CLIP (ViT-B-32) for generating embeddings
-- SentenceTransformer for text encoding
-- HTML/JavaScript for the frontend interface
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+- Backend: FastAPI, Qdrant, CLIP
+- Frontend: HTML, CSS, JavaScript
+- Database: Qdrant Vector DB
 
 ## License
 
-[Add your license information here]
-
-## Acknowledgments
-
-- H&M for the fashion dataset
-- OpenAI for the CLIP model
-- Qdrant for the vector database
+[Your License]
 
