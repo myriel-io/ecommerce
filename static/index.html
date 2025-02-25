@@ -141,6 +141,15 @@
             padding-top: 20px;
             border-top: 1px solid #dee2e6;
         }
+
+        .results-summary {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            color: #666;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
@@ -194,6 +203,7 @@
         </div>
 
         <div id="loading" class="loading">Searching...</div>
+        <div id="summary" class="results-summary" style="display: none;"></div>
         <div id="results" class="results-grid"></div>
         <div class="load-more">
             <button id="loadMoreBtn" onclick="loadMore()">Load More</button>
@@ -306,19 +316,28 @@
                 searchParams.append('limit', '20');
                 searchParams.append('offset', currentOffset.toString());
                 
+                const startTime = performance.now();
                 const response = await fetch(`/search?${searchParams}`);
                 const data = await response.json();
+                const searchTime = Math.round(performance.now() - startTime);
                 
                 if (!response.ok) {
                     throw new Error(data.detail || 'Search failed');
                 }
                 
                 const resultsDiv = document.getElementById('results');
+                const summaryDiv = document.getElementById('summary');
                 const loadMoreBtn = document.getElementById('loadMoreBtn');
+
+                if (currentOffset === 0) {
+                    summaryDiv.innerHTML = `${data.length} results found in ${searchTime}ms`;
+                    summaryDiv.style.display = 'block';
+                }
 
                 if (data.length === 0) {
                     if (currentOffset === 0) {
                         resultsDiv.innerHTML = '<p style="text-align: center; grid-column: 1 / -1;">No matching items found.</p>';
+                        summaryDiv.style.display = 'none';
                     }
                     hasMore = false;
                     loadMoreBtn.style.display = 'none';
@@ -341,7 +360,9 @@
                 }
             } catch (error) {
                 const resultsDiv = document.getElementById('results');
+                const summaryDiv = document.getElementById('summary');
                 resultsDiv.innerHTML = `<p style="text-align: center; grid-column: 1 / -1;">Error: ${error.message}</p>`;
+                summaryDiv.style.display = 'none';
                 console.error('Error:', error);
             }
         }
