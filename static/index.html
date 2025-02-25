@@ -30,8 +30,8 @@
             left: 0;
             right: 0;
             height: 70px;
-            background-color: white;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            background-color: #f8f9fa;  /* Light gray background */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             z-index: 1000;
             display: flex;
             align-items: center;
@@ -42,7 +42,7 @@
         .navbar-brand {
             font-size: 1.3rem;
             font-weight: 500;
-            color: var(--primary-color);
+            color: #1a1a1a;  /* Slightly darker text for better contrast */
             white-space: nowrap;
             width: 250px;
             padding-left: 25px;
@@ -67,7 +67,7 @@
         }
 
         .social-links a {
-            color: var(--primary-color);
+            color: #1a1a1a;  /* Match brand text color */
             text-decoration: none;
             font-size: 20px;
             transition: color 0.2s ease;
@@ -86,9 +86,11 @@
             height: calc(100vh - 70px);
             position: fixed;
             overflow-y: auto;
-            border-right: 1px solid var(--border-color);
+            border-right: none;
+            box-shadow: 2px 0 6px rgba(0,0,0,0.04);
             box-sizing: border-box;
             top: 70px;
+            left: 0;  /* Ensure fixed position from left */
         }
 
         .sidebar h3 {
@@ -106,6 +108,8 @@
             width: calc(100% - 250px);
             box-sizing: border-box;
             background-color: white;
+            box-shadow: inset 2px 0 6px rgba(0,0,0,0.02);  /* Very subtle inset shadow for main content */
+            min-height: calc(100vh - 70px);  /* Ensure full height */
         }
 
         .main-search {
@@ -114,6 +118,17 @@
             margin-bottom: 20px;
             border-bottom: 1px solid var(--border-color);
             box-sizing: border-box;
+            position: relative;
+        }
+
+        .main-search::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.02), transparent);
         }
 
         .main-search input {
@@ -206,8 +221,8 @@
         }
 
         .facet-group {
-            margin-bottom: 40px;
-            padding-bottom: 25px;
+            margin-bottom: 30px;  /* Reduced from 40px */
+            padding-bottom: 20px;  /* Reduced from 25px */
             border-bottom: 1px solid var(--border-color);
         }
 
@@ -217,7 +232,7 @@
 
         .facet-title {
             font-weight: 600;
-            margin-bottom: 15px;
+            margin-bottom: 12px;  /* Reduced from 15px */
             color: var(--primary-color);
             text-transform: uppercase;
             font-size: 0.9rem;
@@ -227,7 +242,7 @@
         .facet-options {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;  /* Reduced from 15px */
         }
 
         .facet-option {
@@ -322,6 +337,24 @@
                 opacity: 1;
                 transform: translateY(0);
             }
+        }
+
+        /* Add smooth scrolling to sidebar */
+        .sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background-color: rgba(0,0,0,0.1);
+            border-radius: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(0,0,0,0.2);
         }
     </style>
 </head>
@@ -571,7 +604,10 @@
             }
         });
 
-        document.addEventListener('DOMContentLoaded', loadGroups);
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadGroups();  // First load the groups
+            searchFashion();     // Then load all results
+        });
     </script>
 </body>
 </html> 
