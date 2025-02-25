@@ -7,19 +7,62 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+            margin: 0;
+            padding: 0;
+            display: flex;
         }
+        
+        .sidebar {
+            width: 250px;
+            background-color: #f8f9fa;
+            padding: 20px;
+            height: 100vh;
+            position: fixed;
+            overflow-y: auto;
+            border-right: 1px solid #dee2e6;
+            box-sizing: border-box;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 20px 40px;
+            width: calc(100% - 250px);
+            box-sizing: border-box;
+        }
+
+        .facet-group {
+            margin-bottom: 20px;
+        }
+
+        .facet-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .facet-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .facet-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         .search-container {
             text-align: center;
             margin: 20px 0;
         }
+
         #searchInput {
             padding: 10px;
             width: 300px;
             margin-right: 10px;
         }
+
         button {
             padding: 10px 20px;
             background-color: #007bff;
@@ -27,64 +70,105 @@
             border: none;
             cursor: pointer;
         }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
         .results-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
+            gap: 30px;
             margin-top: 20px;
             margin-bottom: 40px;
+            padding: 0 10px;
         }
+
         .product-card {
             text-align: center;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            border-radius: 4px;
+            background-color: white;
         }
+
         .product-card img {
-            max-width: 300px;
+            max-width: 100%;
             height: auto;
+            margin-bottom: 10px;
         }
+
+        .product-card h3 {
+            margin: 10px 0;
+            font-size: 1rem;
+        }
+
+        .product-desc {
+            font-size: 0.9rem;
+            color: #666;
+            text-align: left;
+            margin-top: 10px;
+            line-height: 1.4;
+        }
+
         .loading {
             text-align: center;
             margin: 20px 0;
             display: none;
         }
+
         .load-more {
             text-align: center;
             margin: 20px 0;
         }
+
         #loadMoreBtn {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
             display: none;
         }
-        #loadMoreBtn:hover {
-            background-color: #0056b3;
+
+        .clear-filters {
+            margin-top: 20px;
+            width: 100%;
+            background-color: #6c757d;
+        }
+
+        .clear-filters:hover {
+            background-color: #5a6268;
         }
     </style>
 </head>
 <body>
-    <h1 style="text-align: center;">H&M Fashion Search</h1>
-    <p style="text-align: center;">Enter a search query to find fashion items in the H&M collection.</p>
-    
-    <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Search Query">
-        <select id="groupSelect">
-            <option value="">All Groups</option>
-        </select>
-        <button onclick="searchFashion()">Search</button>
+    <div class="sidebar">
+        <h3>Filters</h3>
+        <div class="facet-group">
+            <div class="facet-title">Product Group</div>
+            <div class="facet-options" id="groupFacets">
+                <!-- Groups will be populated here -->
+            </div>
+        </div>
+        <button class="clear-filters" onclick="clearFilters()">Clear All Filters</button>
     </div>
 
-    <div id="loading" class="loading">Searching...</div>
-    <div id="results" class="results-grid"></div>
-    <div class="load-more">
-        <button id="loadMoreBtn" onclick="loadMore()">Load More</button>
+    <div class="main-content">
+        <h1 style="text-align: center;">H&M Fashion Search</h1>
+        <p style="text-align: center;">Enter a search query to find fashion items in the H&M collection.</p>
+        
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search Query">
+            <button onclick="searchFashion()">Search</button>
+        </div>
+
+        <div id="loading" class="loading">Searching...</div>
+        <div id="results" class="results-grid"></div>
+        <div class="load-more">
+            <button id="loadMoreBtn" onclick="loadMore()">Load More</button>
+        </div>
     </div>
 
     <script>
         let currentOffset = 0;
         let currentQuery = '';
-        let currentGroup = '';
+        let selectedGroups = new Set();
         let hasMore = true;
 
         async function loadGroups() {
@@ -93,32 +177,47 @@
                 if (!response.ok) throw new Error('Failed to load groups');
                 const groups = await response.json();
                 
-                const groupSelect = document.getElementById('groupSelect');
+                const groupFacets = document.getElementById('groupFacets');
                 groups.forEach(group => {
-                    const option = document.createElement('option');
-                    option.value = group;
-                    option.textContent = group;
-                    groupSelect.appendChild(option);
+                    const facetOption = document.createElement('div');
+                    facetOption.className = 'facet-option';
+                    facetOption.innerHTML = `
+                        <input type="checkbox" id="${group}" value="${group}" onchange="handleGroupChange(this)">
+                        <label for="${group}">${group}</label>
+                    `;
+                    groupFacets.appendChild(facetOption);
                 });
             } catch (error) {
                 console.error('Error loading groups:', error);
             }
         }
 
+        function handleGroupChange(checkbox) {
+            if (checkbox.checked) {
+                selectedGroups.add(checkbox.value);
+            } else {
+                selectedGroups.delete(checkbox.value);
+            }
+            searchFashion();
+        }
+
+        function clearFilters() {
+            selectedGroups.clear();
+            document.querySelectorAll('.facet-option input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+            });
+            document.getElementById('searchInput').value = '';
+            searchFashion();
+        }
+
         async function searchFashion() {
             currentOffset = 0;
             currentQuery = document.getElementById('searchInput').value.trim();
-            currentGroup = document.getElementById('groupSelect').value;
             hasMore = true;
             
             const loadingDiv = document.getElementById('loading');
             const resultsDiv = document.getElementById('results');
             const loadMoreBtn = document.getElementById('loadMoreBtn');
-
-            if (!currentQuery && !currentGroup) {
-                alert('Please enter a search query or select a group.');
-                return;
-            }
 
             loadingDiv.style.display = 'block';
             resultsDiv.innerHTML = '';
@@ -148,8 +247,13 @@
             try {
                 const searchParams = new URLSearchParams();
                 if (currentQuery) searchParams.append('query', currentQuery);
-                if (currentGroup) searchParams.append('group', currentGroup);
+                if (selectedGroups.size > 0) {
+                    selectedGroups.forEach(group => {
+                        searchParams.append('group', group);
+                    });
+                }
                 searchParams.append('limit', '20');
+                searchParams.append('offset', currentOffset.toString());
                 
                 const response = await fetch(`/search?${searchParams}`);
                 const data = await response.json();
@@ -175,6 +279,7 @@
                             <img src="${result.image_url}" alt="${result.prod_name}" 
                                  onerror="this.onerror=null; this.src='https://via.placeholder.com/300x400?text=Image+Not+Available';">
                             <h3>${result.prod_name}</h3>
+                            <div class="product-desc">${result.detail_desc.length > 100 ? result.detail_desc.substring(0, 100) + '...' : result.detail_desc}</div>
                         `;
                         resultsDiv.appendChild(productCard);
                     });
