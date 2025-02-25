@@ -3,8 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from qdrant_client import QdrantClient
 from sentence_transformers import SentenceTransformer
-from typing import List, Tuple
+from typing import List
 from pydantic import BaseModel
+from urllib.parse import unquote
 
 # Configuration
 QDRANT_HOST = "localhost"
@@ -37,22 +38,109 @@ class SearchResult(BaseModel):
 async def read_root():
     return {"message": "H&M Fashion Search API"}
 
-@app.get("/search/{query}", response_model=List[SearchResult])
-async def search_fashion_items(query: str, limit: int = 6):
-    """Search for fashion items using semantic search."""
+@app.get("/search", response_model=List[SearchResult])
+async def search_fashion_items(query: str = "", group: str = "", limit: int = 20):
+    """Search for fashion items using semantic search and/or group filter."""
     try:
-        query_embedding = sentence_transformer.encode(query)
-        search_results = qdrant_client.search(
-            collection_name=COLLECTION_NAME,
-            query_vector=query_embedding.tolist(),
-            limit=limit
-        )
-        return [
-            SearchResult(
-                image_url=hit.payload.get('image_url'),
-                prod_name=hit.payload.get('prod_name')
-            ) 
-            for hit in search_results
-        ]
+        # Decode URL-encoded parameters and clean them
+        query = unquote(query.strip())
+        group = unquote(group.strip())
+
+        print(f"Search request - Query: '{query}', Group: '{group}'")  # Debug log
+
+        # Create group filter condition
+        conditions = None
+        if group:
+            conditions = {
+                "must": [
+                    {
+                        "key": "index_group_name",
+                        "match": {"value": group}
+                    }
+                ]
+            }
+
+        # If only group filter is provided (no query)
+        if group and not query:
+            try:
+                scroll_results = qdrant_client.scroll(
+                    collection_name=COLLECTION_NAME,
+                    limit=limit,
+                    filter=conditions,
+                    with_payload=True,
+                    with_vectors=False
+                )[0]
+                
+                return [
+                    SearchResult(
+                        image_url=hit.payload.get('image_url', ''),
+                        prod_name=hit.payload.get('prod_name', 'Unknown Product')
+                    ) 
+                    for hit in scroll_results
+                ]
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f"Qdrant scroll error: {str(e)}")
+
+        # If query is provided (with or without group)
+        if query:
+            try:
+                query_vector = sentence_transformer.encode(query).tolist()
+                search_results = qdrant_client.search(
+                    collection_name=COLLECTION_NAME,
+                    query_vector=query_vector,
+                    limit=limit,
+                    query_filter=conditions if conditions else None,
+                    with_payload=True
+                )
+                
+                return [
+                    SearchResult(
+                        image_url=hit.payload.get('image_url', ''),
+                        prod_name=hit.payload.get('prod_name', 'Unknown Product')
+                    ) 
+                    for hit in search_results
+                ]
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f"Search error: {str(e)}")
+
+        # If neither query nor group is provided
+        raise HTTPException(status_code=400, detail="Please provide a search query or group")
+
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+
+@app.get("/groups", response_model=List[str])
+async def get_groups():
+    """Get list of unique index group names."""
+    try:
+        groups = set()
+        offset = 0
+        limit = 100
+        
+        while True:
+            try:
+                scroll_results = qdrant_client.scroll(
+                    collection_name=COLLECTION_NAME,
+                    limit=limit,
+                    offset=offset,
+                    with_payload=["index_group_name"]
+                )[0]
+                
+                if not scroll_results:
+                    break
+                    
+                for result in scroll_results:
+                    if group := result.payload.get('index_group_name'):
+                        groups.add(group)
+                        
+                offset += limit
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f"Qdrant scroll error: {str(e)}")
+        
+        return sorted(list(groups))
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")

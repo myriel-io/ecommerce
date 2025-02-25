@@ -29,9 +29,10 @@
         }
         .results-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 20px;
             margin-top: 20px;
+            margin-bottom: 40px;
         }
         .product-card {
             text-align: center;
@@ -45,6 +46,21 @@
             margin: 20px 0;
             display: none;
         }
+        .load-more {
+            text-align: center;
+            margin: 20px 0;
+        }
+        #loadMoreBtn {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: none;
+        }
+        #loadMoreBtn:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -53,61 +69,143 @@
     
     <div class="search-container">
         <input type="text" id="searchInput" placeholder="Search Query">
+        <select id="groupSelect">
+            <option value="">All Groups</option>
+        </select>
         <button onclick="searchFashion()">Search</button>
     </div>
 
     <div id="loading" class="loading">Searching...</div>
     <div id="results" class="results-grid"></div>
+    <div class="load-more">
+        <button id="loadMoreBtn" onclick="loadMore()">Load More</button>
+    </div>
 
     <script>
+        let currentOffset = 0;
+        let currentQuery = '';
+        let currentGroup = '';
+        let hasMore = true;
+
+        async function loadGroups() {
+            try {
+                const response = await fetch('/groups');
+                if (!response.ok) throw new Error('Failed to load groups');
+                const groups = await response.json();
+                
+                const groupSelect = document.getElementById('groupSelect');
+                groups.forEach(group => {
+                    const option = document.createElement('option');
+                    option.value = group;
+                    option.textContent = group;
+                    groupSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading groups:', error);
+            }
+        }
+
         async function searchFashion() {
-            const query = document.getElementById('searchInput').value.trim();
+            currentOffset = 0;
+            currentQuery = document.getElementById('searchInput').value.trim();
+            currentGroup = document.getElementById('groupSelect').value;
+            hasMore = true;
+            
             const loadingDiv = document.getElementById('loading');
             const resultsDiv = document.getElementById('results');
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
 
-            if (!query) {
-                alert('Please enter a search query.');
+            if (!currentQuery && !currentGroup) {
+                alert('Please enter a search query or select a group.');
                 return;
             }
 
             loadingDiv.style.display = 'block';
             resultsDiv.innerHTML = '';
+            loadMoreBtn.style.display = 'none';
 
             try {
-                const response = await fetch(`/search/${encodeURIComponent(query)}`);
-                if (!response.ok) throw new Error('Search failed');
-                
-                const results = await response.json();
-                
-                if (results.length === 0) {
-                    resultsDiv.innerHTML = '<p style="text-align: center; grid-column: 1 / -1;">No matching items found.</p>';
-                } else {
-                    results.forEach(result => {
-                        const productCard = document.createElement('div');
-                        productCard.className = 'product-card';
-                        productCard.innerHTML = `
-                            <h3>${result.prod_name}</h3>
-                            <img src="${result.image_url}" alt="${result.prod_name}" 
-                                 onerror="this.onerror=null; this.src='https://via.placeholder.com/300x400?text=Image+Not+Available';">
-                        `;
-                        resultsDiv.appendChild(productCard);
-                    });
-                }
-            } catch (error) {
-                resultsDiv.innerHTML = '<p style="text-align: center; grid-column: 1 / -1;">An error occurred while searching.</p>';
-                console.error('Error:', error);
+                await fetchResults();
             } finally {
                 loadingDiv.style.display = 'none';
             }
-
         }
 
-        // Enable search on Enter key press
+        async function loadMore() {
+            if (!hasMore) return;
+            
+            const loadingDiv = document.getElementById('loading');
+            loadingDiv.style.display = 'block';
+            
+            try {
+                await fetchResults();
+            } finally {
+                loadingDiv.style.display = 'none';
+            }
+        }
+
+        async function fetchResults() {
+            try {
+                const searchParams = new URLSearchParams();
+                if (currentQuery) searchParams.append('query', currentQuery);
+                if (currentGroup) searchParams.append('group', currentGroup);
+                searchParams.append('limit', '20');
+                
+                const response = await fetch(`/search?${searchParams}`);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Search failed');
+                }
+                
+                const resultsDiv = document.getElementById('results');
+                const loadMoreBtn = document.getElementById('loadMoreBtn');
+
+                if (data.length === 0) {
+                    if (currentOffset === 0) {
+                        resultsDiv.innerHTML = '<p style="text-align: center; grid-column: 1 / -1;">No matching items found.</p>';
+                    }
+                    hasMore = false;
+                    loadMoreBtn.style.display = 'none';
+                } else {
+                    data.forEach(result => {
+                        const productCard = document.createElement('div');
+                        productCard.className = 'product-card';
+                        productCard.innerHTML = `
+                            <img src="${result.image_url}" alt="${result.prod_name}" 
+                                 onerror="this.onerror=null; this.src='https://via.placeholder.com/300x400?text=Image+Not+Available';">
+                            <h3>${result.prod_name}</h3>
+                        `;
+                        resultsDiv.appendChild(productCard);
+                    });
+
+                    currentOffset += data.length;
+                    loadMoreBtn.style.display = data.length === 20 ? 'inline-block' : 'none';
+                    hasMore = data.length === 20;
+                }
+            } catch (error) {
+                const resultsDiv = document.getElementById('results');
+                resultsDiv.innerHTML = `<p style="text-align: center; grid-column: 1 / -1;">Error: ${error.message}</p>`;
+                console.error('Error:', error);
+            }
+        }
+
+        window.addEventListener('scroll', () => {
+            if (!hasMore) return;
+            
+            const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+            if (scrollTop + clientHeight >= scrollHeight - 5) {
+                loadMore();
+            }
+        });
+
         document.getElementById('searchInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 searchFashion();
             }
         });
+
+        document.addEventListener('DOMContentLoaded', loadGroups);
     </script>
 </body>
 </html> 
