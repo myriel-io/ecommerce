@@ -135,10 +135,11 @@
 
         .results-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);  /* Exactly 4 columns */
+            grid-template-columns: repeat(4, 1fr);
             gap: 35px;
             margin: 30px 0;
             padding: 0;
+            min-height: 200px;  /* Maintain height during transitions */
         }
 
         /* Add media queries for responsiveness */
@@ -166,9 +167,17 @@
             padding: 0;
             border-radius: 8px;
             background-color: white;
-            transition: transform 0.2s ease;
+            transition: transform 0.3s ease;  /* Slower transition */
             cursor: pointer;
+            opacity: 0;  /* Start invisible */
+            animation: fadeIn 0.5s ease forwards;  /* Add fade-in animation */
         }
+
+        /* Add animation delay for each card */
+        .product-card:nth-child(1) { animation-delay: 0s; }
+        .product-card:nth-child(2) { animation-delay: 0.1s; }
+        .product-card:nth-child(3) { animation-delay: 0.2s; }
+        .product-card:nth-child(4) { animation-delay: 0.3s; }
 
         .product-card:hover {
             transform: translateY(-5px);
@@ -302,6 +311,17 @@
             left: 50%;
             transform: translate(-50%, -50%);
             font-size: 12px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
