@@ -10,22 +10,24 @@
             margin: 0;
             padding: 0;
             display: flex;
+            padding-top: 60px;
         }
         
         .sidebar {
             width: 250px;
             background-color: #f8f9fa;
             padding: 20px;
-            height: 100vh;
+            height: calc(100vh - 60px);
             position: fixed;
             overflow-y: auto;
             border-right: 1px solid #dee2e6;
             box-sizing: border-box;
+            top: 60px;
         }
 
         .main-content {
             margin-left: 250px;
-            padding: 20px 40px;
+            padding: 0 40px;
             width: calc(100% - 250px);
             box-sizing: border-box;
         }
@@ -53,8 +55,7 @@
         }
 
         .search-container {
-            text-align: center;
-            margin: 20px 0;
+            display: none;
         }
 
         #searchInput {
@@ -150,9 +151,73 @@
             color: #666;
             font-size: 0.9rem;
         }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            padding: 0;
+            justify-content: flex-start;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            white-space: nowrap;
+            width: 250px;
+            padding-left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .navbar-brand img {
+            height: 24px;  /* Made slightly smaller to match text height */
+            width: auto;
+            object-fit: contain;
+            margin-left: 5px;  /* Add a little space after "by" */
+        }
+
+        .main-search {
+            width: 100%;
+            padding: 20px 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .main-search input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .main-search input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+        }
     </style>
 </head>
 <body>
+    <div class="navbar">
+        <div class="navbar-brand">
+            H&M Fashion Search by
+            <img src="/static/logo.png" alt="H&M Logo">
+        </div>
+    </div>
+
     <div class="sidebar">
         <h3>Filters</h3>
         <div class="facet-group">
@@ -194,14 +259,9 @@
     </div>
 
     <div class="main-content">
-        <h1 style="text-align: center;">H&M Fashion Search</h1>
-        <p style="text-align: center;">Enter a search query to find fashion items in the H&M collection.</p>
-        
-        <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Search Query">
-            <button onclick="searchFashion()">Search</button>
+        <div class="main-search">
+            <input type="text" id="searchInput" placeholder="Search for fashion items... (Press Enter to search)">
         </div>
-
         <div id="loading" class="loading">Searching...</div>
         <div id="summary" class="results-summary" style="display: none;"></div>
         <div id="results" class="results-grid"></div>
