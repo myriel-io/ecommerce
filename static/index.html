@@ -4,152 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>H&M Fashion Search</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        :root {
+            --primary-color: #1a1a1a;
+            --secondary-color: #f8f9fa;
+            --border-color: #e0e0e0;
+            --text-color: #333;
+            --hover-color: #f5f5f5;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
             padding-top: 60px;
-        }
-        
-        .sidebar {
-            width: 250px;
-            background-color: #f8f9fa;
-            padding: 20px;
-            height: calc(100vh - 60px);
-            position: fixed;
-            overflow-y: auto;
-            border-right: 1px solid #dee2e6;
-            box-sizing: border-box;
-            top: 60px;
-        }
-
-        .main-content {
-            margin-left: 250px;
-            padding: 0 40px;
-            width: calc(100% - 250px);
-            box-sizing: border-box;
-        }
-
-        .facet-group {
-            margin-bottom: 20px;
-        }
-
-        .facet-title {
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        .facet-options {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .facet-option {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .search-container {
-            display: none;
-        }
-
-        #searchInput {
-            padding: 10px;
-            width: 300px;
-            margin-right: 10px;
-        }
-
-        button {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        .results-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 30px;
-            margin-top: 20px;
-            margin-bottom: 40px;
-            padding: 0 10px;
-        }
-
-        .product-card {
-            text-align: center;
-            border: 1px solid #dee2e6;
-            padding: 15px;
-            border-radius: 4px;
             background-color: white;
-        }
-
-        .product-card img {
-            max-width: 100%;
-            height: auto;
-            margin-bottom: 10px;
-        }
-
-        .product-card h3 {
-            margin: 10px 0;
-            font-size: 1rem;
-        }
-
-        .product-desc {
-            font-size: 0.9rem;
-            color: #666;
-            text-align: left;
-            margin-top: 10px;
-            line-height: 1.4;
-        }
-
-        .loading {
-            text-align: center;
-            margin: 20px 0;
-            display: none;
-        }
-
-        .load-more {
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        #loadMoreBtn {
-            display: none;
-        }
-
-        .clear-filters {
-            margin-top: 20px;
-            width: 100%;
-            background-color: #6c757d;
-        }
-
-        .clear-filters:hover {
-            background-color: #5a6268;
-        }
-
-        .facet-group + .facet-group {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #dee2e6;
-        }
-
-        .results-summary {
-            margin: 20px 0;
-            padding: 10px;
-            background-color: #f8f9fa;
-            border-radius: 4px;
-            color: #666;
-            font-size: 0.9rem;
+            color: var(--text-color);
         }
 
         .navbar {
@@ -157,23 +29,23 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 60px;
+            height: 70px;
             background-color: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             z-index: 1000;
             display: flex;
             align-items: center;
             padding: 0;
-            justify-content: flex-start;
+            justify-content: space-between;
         }
 
         .navbar-brand {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #333;
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: var(--primary-color);
             white-space: nowrap;
             width: 250px;
-            padding-left: 20px;
+            padding-left: 25px;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -187,26 +59,249 @@
             margin-left: 5px;  /* Add a little space after "by" */
         }
 
+        .social-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding-right: 25px;
+        }
+
+        .social-links a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 20px;
+            transition: color 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .social-links a:hover {
+            color: #007bff;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: white;
+            padding: 0 25px;
+            height: calc(100vh - 70px);
+            position: fixed;
+            overflow-y: auto;
+            border-right: 1px solid var(--border-color);
+            box-sizing: border-box;
+            top: 70px;
+        }
+
+        .sidebar h3 {
+            margin: 30px 0;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 0 40px;
+            width: calc(100% - 250px);
+            box-sizing: border-box;
+            background-color: white;
+        }
+
         .main-search {
             width: 100%;
-            padding: 20px 0;
+            padding: 30px 0;
             margin-bottom: 20px;
-            border-bottom: 1px solid #dee2e6;
+            border-bottom: 1px solid var(--border-color);
+            box-sizing: border-box;
         }
 
         .main-search input {
             width: 100%;
-            padding: 12px 20px;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
+            padding: 15px 25px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
             font-size: 1rem;
-            transition: border-color 0.2s;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+            background-color: var(--secondary-color);
         }
 
         .main-search input:focus {
             outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+            border-color: var(--primary-color);
+            background-color: white;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);  /* Exactly 4 columns */
+            gap: 35px;
+            margin: 30px 0;
+            padding: 0;
+        }
+
+        /* Add media queries for responsiveness */
+        @media (max-width: 1400px) {
+            .results-grid {
+                grid-template-columns: repeat(3, 1fr);  /* 3 columns on smaller screens */
+            }
+        }
+
+        @media (max-width: 1100px) {
+            .results-grid {
+                grid-template-columns: repeat(2, 1fr);  /* 2 columns on even smaller screens */
+            }
+        }
+
+        @media (max-width: 768px) {
+            .results-grid {
+                grid-template-columns: 1fr;  /* 1 column on mobile */
+            }
+        }
+
+        .product-card {
+            text-align: left;
+            border: none;
+            padding: 0;
+            border-radius: 8px;
+            background-color: white;
+            transition: transform 0.2s ease;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-card img {
+            width: 100%;
+            aspect-ratio: 3/4;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .product-card h3 {
+            margin: 0 0 8px 0;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
+        .product-desc {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.5;
+            margin-top: 8px;
+        }
+
+        .facet-group {
+            margin-bottom: 40px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .facet-group:last-child {
+            border-bottom: none;
+        }
+
+        .facet-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.7px;
+        }
+
+        .facet-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .facet-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .facet-option label {
+            font-size: 1rem;
+            cursor: pointer;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .clear-filters {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .clear-filters:hover {
+            background-color: var(--hover-color);
+        }
+
+        .results-summary {
+            font-size: 0.9rem;
+            color: #666;
+            margin: 0;
+            padding: 0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        #loadMoreBtn {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            border: 1px solid var(--border-color);
+            padding: 15px 30px;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        #loadMoreBtn:hover {
+            background-color: var(--hover-color);
+        }
+
+        /* Custom checkbox styles */
+        input[type="checkbox"] {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        input[type="checkbox"]:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        input[type="checkbox"]:checked::after {
+            content: "✓";
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
         }
     </style>
 </head>
@@ -216,10 +311,24 @@
             H&M Fashion Search by
             <img src="/static/logo.png" alt="H&M Logo">
         </div>
+        <div class="social-links">
+            <a href="https://discord.gg/your-discord" target="_blank" title="Discord">
+                <i class="fab fa-discord"></i>
+            </a>
+            <a href="https://github.com/your-github" target="_blank" title="GitHub">
+                <i class="fab fa-github"></i>
+            </a>
+            <a href="https://linkedin.com/in/your-linkedin" target="_blank" title="LinkedIn">
+                <i class="fab fa-linkedin"></i>
+            </a>
+            <a href="https://twitter.com/your-twitter" target="_blank" title="Twitter">
+                <i class="fab fa-twitter"></i>
+            </a>
+        </div>
     </div>
 
     <div class="sidebar">
-        <h3>Filters</h3>
+        <h3>Categories</h3>
         <div class="facet-group">
             <div class="facet-title">Product Group</div>
             <div class="facet-options" id="groupFacets">
@@ -227,7 +336,7 @@
             </div>
         </div>
         <div class="facet-group">
-            <div class="facet-title">Item</div>
+            <div class="facet-title">Item Type</div>
             <div class="facet-options" id="itemFacets">
                 <div class="facet-option">
                     <input type="checkbox" id="Dress" value="Dress" onchange="handleItemChange(this)">
