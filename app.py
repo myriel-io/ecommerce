@@ -1,13 +1,15 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import Response
 import lancedb
 from sentence_transformers import SentenceTransformer
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel
 from urllib.parse import unquote
 import numpy as np
 import pandas as pd
+import base64
 
 # Configuration
 class Config:
@@ -47,6 +49,7 @@ class LanceDBService:
             # For now, we'll create an empty table with the expected schema
             schema = {
                 "image_url": "string",
+                "image_data": "string",  # Base64 encoded image data
                 "prod_name": "string", 
                 "detail_desc": "string",
                 "product_type_name": "string",
@@ -180,3 +183,43 @@ async def search_fashion_items(
 async def get_groups():
     """Get list of unique index group names in specified order."""
     return await lancedb_service.get_groups()
+
+@app.get("/image/{article_id}")
+async def get_image(article_id: str):
+    """Serve binary image data from the database."""
+    try:
+        # Search for the item by article_id
+        results = lancedb_service.table.search().where(f"article_id = '{article_id}'").limit(1).to_pandas()
+        
+        if results.empty:
+            raise HTTPException(status_code=404, detail="Image not found")
+        
+        image_data = results.iloc[0]['image_data']
+        
+        # Decode base64 image data
+        try:
+            # Remove data URL prefix if present (e.g., "data:image/jpeg;base64,")
+            if image_data.startswith('data:'):
+                image_data = image_data.split(',', 1)[1]
+            
+            image_bytes = base64.b64decode(image_data)
+            
+            # Determine content type based on image format
+            if image_bytes.startswith(b'\xff\xd8\xff'):
+                content_type = "image/jpeg"
+            elif image_bytes.startswith(b'\x89PNG'):
+                content_type = "image/png"
+            elif image_bytes.startswith(b'GIF'):
+                content_type = "image/gif"
+            elif image_bytes.startswith(b'WEBP'):
+                content_type = "image/webp"
+            else:
+                content_type = "image/jpeg"  # Default fallback
+            
+            return Response(content=image_bytes, media_type=content_type)
+            
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error decoding image: {str(e)}")
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving image: {str(e)}")
