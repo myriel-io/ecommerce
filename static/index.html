@@ -800,7 +800,7 @@
             const modalSize = document.getElementById('modalSize');
             const modalArticleId = document.getElementById('modalArticleId');
 
-            modalImg.src = result.image_url;
+            modalImg.src = result.image_url === 'binary_stored' ? `/image/${result.article_id}` : result.image_url;
             modalImg.onerror = () => {
                 modalImg.src = 'https://via.placeholder.com/400x533?text=Image+Not+Available';
             };
