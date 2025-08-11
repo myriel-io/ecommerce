@@ -745,7 +745,7 @@
                         const productCard = document.createElement('div');
                         productCard.className = 'product-card';
                         productCard.innerHTML = `
-                            <img src="${result.image_url}" alt="${result.prod_name}" 
+                            <img src="${result.image_url === 'binary_stored' ? `/image/${result.article_id}` : result.image_url}" alt="${result.prod_name}" 
                                  onerror="this.onerror=null; this.src='https://via.placeholder.com/300x400?text=Image+Not+Available';">
                             <h3>${result.prod_name}</h3>
                             <div class="product-desc">${result.detail_desc.length > 100 ? result.detail_desc.substring(0, 100) + '...' : result.detail_desc}</div>
@@ -800,7 +800,7 @@
             const modalSize = document.getElementById('modalSize');
             const modalArticleId = document.getElementById('modalArticleId');
 
-            modalImg.src = result.image_url;
+            modalImg.src = result.image_url === 'binary_stored' ? `/image/${result.article_id}` : result.image_url;
             modalImg.onerror = () => {
                 modalImg.src = 'https://via.placeholder.com/400x533?text=Image+Not+Available';
             };
