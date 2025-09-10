@@ -85,9 +85,9 @@ class LanceDBService:
             if not query:
                 # No query, just filter and paginate
                 if filter_condition:
-                    results = self.table.search().where(filter_condition).limit(limit).offset(offset).to_pandas()
+                    results = self.table.search().where(filter_condition).limit(limit).to_pandas()
                 else:
-                    results = self.table.search().limit(limit).offset(offset).to_pandas()
+                    results = self.table.search().limit(limit).to_pandas()
             else:
                 # Semantic search with query
                 query_vector = self.encoder.encode(query).tolist()
@@ -96,7 +96,7 @@ class LanceDBService:
                 if filter_condition:
                     search_query = search_query.where(filter_condition)
                 
-                results = search_query.limit(limit).offset(offset).to_pandas()
+                results = search_query.limit(limit).to_pandas()
 
             if results.empty:
                 return []
@@ -170,14 +170,13 @@ async def search_fashion_items(
     query: str = "", 
     group: List[str] = Query(default=[]),
     item: List[str] = Query(default=[]),
-    limit: int = 20,
-    offset: int = 0
+    limit: int = 20
 ):
     """Search for fashion items using semantic search and/or filters."""
     query = unquote(query.strip())
     groups = [unquote(g.strip()) for g in group]
     items = [unquote(i.strip()) for i in item]
-    return await lancedb_service.search(query, groups, items, limit, offset)
+    return await lancedb_service.search(query, groups, items, limit, 0)
 
 @app.get("/groups", response_model=List[str])
 async def get_groups():
